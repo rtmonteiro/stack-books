@@ -1,4 +1,4 @@
-import { beforeEach, describe, it } from 'node:test';
+import { describe, it } from 'node:test';
 import { isShelvesValid, printShelves, moveCats } from './index.js';
 describe('Shelves', () => {
     it('are valid', (t) => {

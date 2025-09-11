@@ -1,13 +1,36 @@
 import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 
+function formatNumberWithLeadingZero(num) {
+  return String(num).padStart(2, '0');
+}
+
+/**
+ * Print the shelves in sequence as stacks besides one another
+ * @param {Array<Array<number>>} shelves 
+ * @example
+ * printShelves([
+ *   [1, 2, 3],
+ *   [4, 5, 6],
+ *   [7, 8, 9]
+ * ]);
+ * @returns {void}
+ */
 export function printShelves(shelves) {
-  console.log("Current shelves:");
-  shelves.forEach((shelf, index) => {
-    if (shelf.length === 0) console.log(`\tShelf ${index + 1} is empty`);
-    else console.log(`\tShelf ${index + 1}: ${shelf.join(", ")}`);
-  });
-  console.log("\n\n");
+  const maxHeight = Math.max(...shelves.map(shelf => shelf.length));
+  for (let i = maxHeight - 1; i >= 0; i--) {
+    let row = "";
+    for (const shelf of shelves) {
+      row += `| ${shelf[i] === undefined ? "  " : formatNumberWithLeadingZero(shelf[i])} `;
+    }
+    console.log(row + "|");
+  }
+  console.log("-".repeat(shelves.length * 5 + 1));
+  // print the index of each shelf
+  for (let i = 0; i < shelves.length; i++) {
+    process.stdout.write(`| ${formatNumberWithLeadingZero(i + 1)} `);
+  }
+  console.log("|\n");
 }
 
 /**
@@ -31,9 +54,13 @@ export function moveCats(source_shelf, target_shelf, height, shelves) {
   const source_cat = shelves[source_shelf].at(-1);
   const cats_to_move = [];
   // Get all cats of the same color at the top of the source shelf
-  while (shelves[source_shelf].length > 0 
+  while (shelves[source_shelf].length > 0
     && shelves[source_shelf].at(-1) === source_cat) {
     cats_to_move.push(shelves[source_shelf].pop());
+  }
+  // Check if the target position is not empty and has the same color as the source_cat
+  if (shelves[target_shelf].length > 0 && shelves[target_shelf].at(-1) !== source_cat) {
+    throw new Error("Target position has a different color");
   }
   // Check if the target position has enough space
   if (cats_to_move.length > height - shelves[target_shelf].length) {
@@ -58,49 +85,56 @@ export function isShelvesValid(height, shelves) {
 
 export function isGameFinished(height, shelves) {
   // Check if all shelves are valid and contain the correct number of cats
-  return isShelvesValid(height, shelves) 
+  return isShelvesValid(height, shelves)
     && shelves.every(shelf => shelf.length === 0 // Or the shelf is empty
       || (shelf.length === height && shelf.every(cat => cat === shelf[0]))); // Or the shelf is full of cats from the same color
 }
 
 function initializeShelves(game) {
-  const {shelves, colors, height, quantity} = game;
+  const { shelves, colors, height, quantity } = game;
   // Initialize shelves with random colors
-  for (let i = 0; i < quantity; i++) {
-    const color = Math.floor(Math.random() * colors) + 1;
-    let placed = false;
-    while (!placed) {
-      const shelfIndex = Math.floor(Math.random() * shelves.length);
-      if (shelves[shelfIndex].length < height) {
-        shelves[shelfIndex].push(color);
-        placed = true;
-      }
-    }
+  // Create the set of available cats to be sorted
+  const availableCats = [];
+  for (let i = 0; i < colors; i++) {
+    availableCats.push(...Array(height).fill(i + 1));
+  }
+  // Shuffle the available cats
+  for (let i = availableCats.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [availableCats[i], availableCats[j]] = [availableCats[j], availableCats[i]];
+  }
+  // Distribute the available cats into the shelves
+  for (let i = 0; i < shelves.length; i++) {
+    shelves[i] = availableCats.splice(0, height);
   }
   return shelves;
 }
 
-async function startGame() {
+export async function startGame() {
   console.log("Starting the game...");
   const game = {
     shelves: [
-      [1, 2, 3],
-      [1, 3, 2],
-      [1, 2, 3],
+      [1, 2, 3, 4, 5],
+      [5, 5, 5, 6, 7],
+      [6, 2, 4, 7, 3],
+      [8, 6, 7, 7, 9],
+      [8, 3, 9, 8, 5],
+      [1, 9, 2, 4, 2],
+      [9, 2, 1, 4, 1],
+      [8, 3, 6, 6, 8],
+      [3, 1, 4, 7, 9],
       [],
       []
     ],
-    colors: 3,
-    height: 3,
-    quantity: 5
+    colors: 9,
+    height: 5,
+    quantity: 11
   }
   const game_shelves = game.shelves;
   printShelves(game_shelves);
   const rl = createInterface({ input, output });
 
   try {
-    // Start the game loop or any other game logic here
-    // For example, you could implement user input handling to move cats between shelves
     while (!isGameFinished(game.height, game_shelves)) {
       const sourceShelf = await rl.question(`Enter the source shelf (1-${game.quantity}): `);
       const targetShelf = await rl.question(`Enter the target shelf (1-${game.quantity}): `);
