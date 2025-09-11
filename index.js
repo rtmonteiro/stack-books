@@ -1,4 +1,4 @@
-import * as readline from 'node:readline/promises';
+import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 
 export function printShelves(shelves) {
@@ -26,19 +26,18 @@ export function printShelves(shelves) {
 export function moveCats(source_shelf, target_shelf, height, shelves) {
   // Check if the source position has a cat
   if (shelves[source_shelf].length === 0) {
-    console.error("No cat at the source position");
-    return;
+    throw new Error("No cat at the source position");
   }
   const source_cat = shelves[source_shelf].at(-1);
   const cats_to_move = [];
   // Get all cats of the same color at the top of the source shelf
-  while (shelves[source_shelf].length > 0 && shelves[source_shelf].at(-1) === source_cat) {
+  while (shelves[source_shelf].length > 0 
+    && shelves[source_shelf].at(-1) === source_cat) {
     cats_to_move.push(shelves[source_shelf].pop());
   }
   // Check if the target position has enough space
   if (cats_to_move.length > height - shelves[target_shelf].length) {
-    console.error("Target position does not have enough space");
-    return;
+    throw new Error("Target position does not have enough space");
   }
   // Move the cats to the target position
   shelves[target_shelf].push(...cats_to_move);
@@ -55,6 +54,13 @@ export function isShelvesValid(height, shelves) {
       return acc;
     }, {});
   return Object.values(colorCounts).every(count => count % height === 0);
+}
+
+export function isGameFinished(height, shelves) {
+  // Check if all shelves are valid and contain the correct number of cats
+  return isShelvesValid(height, shelves) 
+    && shelves.every(shelf => shelf.length === 0 // Or the shelf is empty
+      || (shelf.length === height && shelf.every(cat => cat === shelf[0]))); // Or the shelf is full of cats from the same color
 }
 
 function initializeShelves(game) {
@@ -81,21 +87,32 @@ async function startGame() {
       [1, 2, 3],
       [1, 3, 2],
       [1, 2, 3],
+      [],
       []
     ],
     colors: 3,
     height: 3,
-    quantity: 4
+    quantity: 5
   }
   const game_shelves = game.shelves;
   printShelves(game_shelves);
-  // Start the game loop or any other game logic here
-  // For example, you could implement user input handling to move cats between shelves
-  while (isShelvesValid(game.height, game_shelves)) {
-    const sourceShelf = 0;
-    const targetShelf = 3;
-    moveCats(sourceShelf, targetShelf, game.height, game_shelves);
-    printShelves(game_shelves);
+  const rl = createInterface({ input, output });
+
+  try {
+    // Start the game loop or any other game logic here
+    // For example, you could implement user input handling to move cats between shelves
+    while (!isGameFinished(game.height, game_shelves)) {
+      const sourceShelf = await rl.question(`Enter the source shelf (1-${game.quantity}): `);
+      const targetShelf = await rl.question(`Enter the target shelf (1-${game.quantity}): `);
+      moveCats(Number(sourceShelf) - 1, Number(targetShelf) - 1, game.height, game_shelves);
+      printShelves(game_shelves);
+    }
+    console.log("Congratulations! You've completed the game!");
+  }
+  catch (error) {
+    console.error("An error occurred:", error);
+  } finally {
+    rl.close(); // Ensure the readline interface is closed
   }
 }
 
