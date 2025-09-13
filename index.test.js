@@ -1,5 +1,5 @@
 import { describe, it } from 'node:test';
-import { isShelvesValid, printShelves, moveCats } from './index.js';
+import { isShelvesValid, printShelves, moveBooks } from './index.js';
 describe('Shelves', () => {
     it('are valid', (t) => {
         // Branco 1
@@ -50,7 +50,7 @@ describe('Shelves', () => {
         t.assert.ok(!isShelvesValid(height, shelves));
     });
 
-    it('moves a cat', (t) => {
+    it('moves a book', (t) => {
         const {shelves, height} = {
             shelves: [
                 [1, 1, 1],
@@ -62,13 +62,13 @@ describe('Shelves', () => {
             height: 3,
             quantity: 4
         };
-        printShelves(shelves);
-        moveCats(0, 3, height, shelves);
-        printShelves(shelves);
+        printShelves(height, shelves);
+        moveBooks(0, 3, height, shelves);
+        printShelves(height, shelves);
         t.assert.ok(isShelvesValid(height, shelves));
     });
 
-    it('moves a cat', (t) => {
+    it('moves a book', (t) => {
         const {shelves, height} = {
             shelves: [
                 [1, 1, 1],
@@ -80,9 +80,9 @@ describe('Shelves', () => {
             height: 3,
             quantity: 4
         };
-        printShelves(shelves);
-        moveCats(0, 3, height, shelves);
-        printShelves(shelves);
+        printShelves(height, shelves);
+        moveBooks(0, 3, height, shelves);
+        printShelves(height, shelves);
         t.assert.ok(isShelvesValid(height, shelves));
     });
 });

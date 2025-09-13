@@ -16,8 +16,9 @@ function formatNumberWithLeadingZero(num) {
  * ]);
  * @returns {void}
  */
-export function printShelves(shelves) {
-  const maxHeight = Math.max(...shelves.map(shelf => shelf.length));
+export function printShelves(height, shelves) {
+  // const maxHeight = Math.max(...shelves.map(shelf => shelf.length));
+  const maxHeight = height;
   for (let i = maxHeight - 1; i >= 0; i--) {
     let row = "";
     for (const shelf of shelves) {
@@ -35,44 +36,44 @@ export function printShelves(shelves) {
 
 /**
  * Considering that we deal with the shelves as 2D stacks
- * When moving a cat from a shelf to another, we need to ensure that
- * the target position is empty and the source position has a cat.
- * When moving a cat, it moves all cats that have the same color
+ * When moving a book from a shelf to another, we need to ensure that
+ * the target position is empty and the source position has a book.
+ * When moving a book, it moves all books that have the same color
  * in the top of the stack to the top of the target shelf.
- * At the end, when moving a cat, we need to update the shelves accordingly. 
+ * At the end, when moving a book, we need to update the shelves accordingly. 
  * If not, we should return an error message.
  * @param {number} source_shelf 
  * @param {number} target_shelf
  * @param {number} height
  * @param {Array<Array<number>>} shelves
  */
-export function moveCats(source_shelf, target_shelf, height, shelves) {
-  // Check if the source position has a cat
+export function moveBooks(source_shelf, target_shelf, height, shelves) {
+  // Check if the source position has a book
   if (shelves[source_shelf].length === 0) {
-    throw new Error("No cat at the source position");
+    throw new Error("No book at the source position");
   }
-  const source_cat = shelves[source_shelf].at(-1);
-  const cats_to_move = [];
-  // Get all cats of the same color at the top of the source shelf
+  const source_book = shelves[source_shelf].at(-1);
+  const books_to_move = [];
+  // Get all books of the same color at the top of the source shelf
   while (shelves[source_shelf].length > 0
-    && shelves[source_shelf].at(-1) === source_cat) {
-    cats_to_move.push(shelves[source_shelf].pop());
+    && shelves[source_shelf].at(-1) === source_book) {
+    books_to_move.push(shelves[source_shelf].pop());
   }
-  // Check if the target position is not empty and has the same color as the source_cat
-  if (shelves[target_shelf].length > 0 && shelves[target_shelf].at(-1) !== source_cat) {
+  // Check if the target position is not empty and has the same color as the source_book
+  if (shelves[target_shelf].length > 0 && shelves[target_shelf].at(-1) !== source_book) {
     throw new Error("Target position has a different color");
   }
   // Check if the target position has enough space
-  if (cats_to_move.length > height - shelves[target_shelf].length) {
+  if (books_to_move.length > height - shelves[target_shelf].length) {
     throw new Error("Target position does not have enough space");
   }
-  // Move the cats to the target position
-  shelves[target_shelf].push(...cats_to_move);
+  // Move the books to the target position
+  shelves[target_shelf].push(...books_to_move);
 }
 
 export function isShelvesValid(height, shelves) {
-  // Considering each value of a shelf a color of a cat
-  // Check if the quantity of cats of each color 
+  // Considering each value of a shelf a color of a book
+  // Check if the quantity of books of each color 
   // is divisible by the length of a shelf
   const colorCounts = shelves
     .flat()
@@ -84,28 +85,30 @@ export function isShelvesValid(height, shelves) {
 }
 
 export function isGameFinished(height, shelves) {
-  // Check if all shelves are valid and contain the correct number of cats
+  // Check if all shelves are valid and contain the correct number of books
   return isShelvesValid(height, shelves)
     && shelves.every(shelf => shelf.length === 0 // Or the shelf is empty
-      || (shelf.length === height && shelf.every(cat => cat === shelf[0]))); // Or the shelf is full of cats from the same color
+      || (shelf.length === height && shelf.every(book => book === shelf[0]))); // Or the shelf is full of books from the same color
 }
 
 function initializeShelves(game) {
-  const { shelves, colors, height, quantity } = game;
+  const { colors, height, quantity } = game;
   // Initialize shelves with random colors
-  // Create the set of available cats to be sorted
-  const availableCats = [];
+
+  // Create the set of available books to be sorted
+  const availableBooks = [];
   for (let i = 0; i < colors; i++) {
-    availableCats.push(...Array(height).fill(i + 1));
+    availableBooks.push(...Array(height).fill(i + 1));
   }
-  // Shuffle the available cats
-  for (let i = availableCats.length - 1; i > 0; i--) {
+  // Shuffle the available books
+  for (let i = availableBooks.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [availableCats[i], availableCats[j]] = [availableCats[j], availableCats[i]];
+    [availableBooks[i], availableBooks[j]] = [availableBooks[j], availableBooks[i]];
   }
-  // Distribute the available cats into the shelves
-  for (let i = 0; i < shelves.length; i++) {
-    shelves[i] = availableCats.splice(0, height);
+  // Distribute the available books into the shelves
+  const shelves = new Array(quantity);
+  for (let i = 0; i < quantity; i++) {
+    shelves[i] = availableBooks.splice(0, height);
   }
   return shelves;
 }
@@ -113,33 +116,20 @@ function initializeShelves(game) {
 export async function startGame() {
   console.log("Starting the game...");
   const game = {
-    shelves: [
-      [1, 2, 3, 4, 5],
-      [5, 5, 5, 6, 7],
-      [6, 2, 4, 7, 3],
-      [8, 6, 7, 7, 9],
-      [8, 3, 9, 8, 5],
-      [1, 9, 2, 4, 2],
-      [9, 2, 1, 4, 1],
-      [8, 3, 6, 6, 8],
-      [3, 1, 4, 7, 9],
-      [],
-      []
-    ],
-    colors: 9,
+    colors: 6,
     height: 5,
-    quantity: 11
+    quantity: 9
   }
-  const game_shelves = game.shelves;
-  printShelves(game_shelves);
+  const game_shelves = initializeShelves(game);
+  printShelves(game.height, game_shelves);
   const rl = createInterface({ input, output });
 
   try {
     while (!isGameFinished(game.height, game_shelves)) {
       const sourceShelf = await rl.question(`Enter the source shelf (1-${game.quantity}): `);
       const targetShelf = await rl.question(`Enter the target shelf (1-${game.quantity}): `);
-      moveCats(Number(sourceShelf) - 1, Number(targetShelf) - 1, game.height, game_shelves);
-      printShelves(game_shelves);
+      moveBooks(Number(sourceShelf) - 1, Number(targetShelf) - 1, game.height, game_shelves);
+      printShelves(game.height, game_shelves);
     }
     console.log("Congratulations! You've completed the game!");
   }
