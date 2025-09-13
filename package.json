@@ -1,0 +1,31 @@
+{
+  "name": "stack-books",
+  "version": "1.0.1",
+  "description": "Simples game made in Node.js where you have to group books of the same color in stacks on your terminal.",
+  "main": "index.js",
+  "bin": {
+    "play-stack-books": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rtmonteiro/stack-books.git"
+  },
+  "keywords": [
+    "books",
+    "stack",
+    "cli",
+    "nodejs",
+    "javascript"
+  ],
+  "author": "Ryan Monteiro (rtmonteiro)",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/rtmonteiro/stack-books/issues"
+  },
+  "homepage": "https://github.com/rtmonteiro/stack-books#readme"
+}
