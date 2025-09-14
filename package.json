@@ -27,5 +27,8 @@
   "bugs": {
     "url": "https://github.com/rtmonteiro/stack-books/issues"
   },
-  "homepage": "https://github.com/rtmonteiro/stack-books#readme"
+  "homepage": "https://github.com/rtmonteiro/stack-books#readme",
+  "dependencies": {
+    "terminal-kit": "^3.1.2"
+  }
 }
