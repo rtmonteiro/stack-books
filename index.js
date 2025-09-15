@@ -1,7 +1,15 @@
 #!/usr/bin/env node
 import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
+import terminalKit from 'terminal-kit';
 
+const term = terminalKit.terminal;
+
+/**
+ * Format a number with leading zero if it's less than 10
+ * @param {number} num 
+ * @returns {string}
+ */
 function formatNumberWithLeadingZero(num) {
   return String(num).padStart(2, '0');
 }
@@ -33,6 +41,52 @@ export function printShelves(height, shelves) {
     process.stdout.write(`| ${formatNumberWithLeadingZero(i + 1)} `);
   }
   console.log("|\n");
+}
+
+/**
+ * Print the shelves in sequence as stacks besides one another
+ * with terminal-kit, where each color is represented by a different color
+ * @param {Array<Array<number>>} shelves 
+ * @example
+ * printShelvesTerminalKit([
+ *   [1, 2, 3],
+ *   [4, 5, 6],
+ *   [7, 8, 9]
+ * ]);
+ * @returns {void}
+ */
+function printShelvesTerminalKit(height, quantity,shelves) {
+  term.clear();
+  // print the lines from top to bottom
+  for (let i = height; i >= 0; i--) {
+    for (let j = 0; j < quantity + 1; j++) {
+      term.moveTo(j * 3 + 1, height - i);
+      term.white('|');
+    }
+  }
+  // print the spacer line
+  term.moveTo(1, height + 1);
+  term('-'.repeat(quantity * 3 + 1) + '\n');
+  // print the index of each shelf
+  for (let i = 0; i < quantity; i++) {
+    term.moveTo(i * 3 + 2, height + 2);
+    term.white(formatNumberWithLeadingZero(i + 1));
+  }
+  // print the lines for the index of each shelf
+  for (let i = 0; i < quantity + 1; i++) {
+    term.moveTo(i * 3 + 1, height + 2);
+    term.white('|');
+  }
+  // print the books in each shelf from bottom to top
+  for (let i = 0; i < quantity; i++) {
+    for (let j = 0; j < shelves[i].length; j++) {
+      term.moveTo(i * 3 + 2, height - j);
+      term.color(shelves[i][j])(formatNumberWithLeadingZero(shelves[i][j]));
+    }
+  }
+  // move the cursor to the bottom of the terminal
+  term.moveTo(1, height + 2);
+  term('\n');
 }
 
 /**
@@ -122,7 +176,7 @@ export async function startGame() {
     quantity: 9
   }
   const game_shelves = initializeShelves(game);
-  printShelves(game.height, game_shelves);
+  printShelvesTerminalKit(game.height, game.quantity, game_shelves);
   const rl = createInterface({ input, output });
 
   try {
@@ -130,7 +184,7 @@ export async function startGame() {
       const sourceShelf = await rl.question(`Enter the source shelf (1-${game.quantity}): `);
       const targetShelf = await rl.question(`Enter the target shelf (1-${game.quantity}): `);
       moveBooks(Number(sourceShelf) - 1, Number(targetShelf) - 1, game.height, game_shelves);
-      printShelves(game.height, game_shelves);
+      printShelvesTerminalKit(game.height, game.quantity, game_shelves);
     }
     console.log("Congratulations! You've completed the game!");
   }
