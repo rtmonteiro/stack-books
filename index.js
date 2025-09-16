@@ -1,7 +1,9 @@
 #!/usr/bin/env node
+
 import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import terminalKit from 'terminal-kit';
+import { Command } from 'commander';
 
 const term = terminalKit.terminal;
 
@@ -168,12 +170,10 @@ function initializeShelves(game) {
   return shelves;
 }
 
-export async function startGame() {
-  const { colors, height } = process.argv.length === 4
-    ? { colors: Number(process.argv[2]), height: Number(process.argv[3]) }
-    : { colors: 6, height: 5 };
+
+export async function startGame({ colors = 6, height = 5 } = {}) {
   if (isNaN(colors) || isNaN(height) || colors < 2 || height < 1) {
-    console.error("Invalid arguments. Usage: node index.js [colors (>=2)] [height (>=1)]");
+    console.error("Invalid arguments. Usage: stack-books [options]\n  --colors <number> (>=2)\n  --height <number> (>=1)");
     process.exit(1);
   }
 
@@ -182,7 +182,7 @@ export async function startGame() {
     colors,
     height,
     quantity: colors + 2 // Two extra shelves for maneuvering
-  }
+  };
   const game_shelves = initializeShelves(game);
   printShelvesTerminalKit(game.height, game.quantity, game_shelves);
   const rl = createInterface({ input, output });
@@ -203,4 +203,17 @@ export async function startGame() {
   }
 }
 
-startGame();
+// Commander CLI setup for ES modules
+const isMain = import.meta.url === `file://${process.argv[1]}` || import.meta.url === process.argv[1];
+if (isMain) {
+  const program = new Command()
+    .name('stack-books')
+    .description('A simple CLI game to group books of the same color in stacks.')
+    .option('-c, --colors <number>', 'number of colors (>=2)', v => Number(v), 6)
+    .option('-m, --max-height <number>', 'maximum height of each shelf (>=1)', v => Number(v), 5)
+    .addHelpText('after', `\nExamples:\n  $ npx play-stack-books -c 5 -m 5`)
+    .parse(process.argv);
+
+  const options = program.opts();
+  startGame({ colors: options.colors, height: options.maxHeight });
+}

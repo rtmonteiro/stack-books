@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/rtmonteiro/stack-books#readme",
   "dependencies": {
+    "commander": "^14.0.1",
     "terminal-kit": "^3.1.2"
   }
 }
