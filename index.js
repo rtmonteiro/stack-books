@@ -203,17 +203,13 @@ export async function startGame({ colors = 6, height = 5 } = {}) {
   }
 }
 
-// Commander CLI setup for ES modules
-const isMain = import.meta.url === `file://${process.argv[1]}` || import.meta.url === process.argv[1];
-if (isMain) {
-  const program = new Command()
-    .name('stack-books')
-    .description('A simple CLI game to group books of the same color in stacks.')
-    .option('-c, --colors <number>', 'number of colors (>=2)', v => Number(v), 6)
-    .option('-m, --max-height <number>', 'maximum height of each shelf (>=1)', v => Number(v), 5)
-    .addHelpText('after', `\nExamples:\n  $ npx play-stack-books -c 5 -m 5`)
-    .parse(process.argv);
+const program = new Command()
+  .name('stack-books')
+  .description('A simple CLI game to group books of the same color in stacks.')
+  .option('-c, --colors <number>', 'number of colors (>=2)', v => Number(v), 6)
+  .option('-m, --max-height <number>', 'maximum height of each shelf (>=1)', v => Number(v), 5)
+  .addHelpText('after', `\nExamples:\n  $ npx play-stack-books -c 5 -m 5\n  $ npx stack-books -c 4 -m 4`)
+  .parse(process.argv);
 
-  const options = program.opts();
-  startGame({ colors: options.colors, height: options.maxHeight });
-}
+const options = program.opts();
+startGame({ colors: options.colors, height: options.maxHeight });

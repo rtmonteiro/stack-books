@@ -1,10 +1,11 @@
 {
   "name": "stack-books",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "Simples game made in Node.js where you have to group books of the same color in stacks on your terminal.",
   "main": "index.js",
   "bin": {
-    "play-stack-books": "./index.js"
+    "play-stack-books": "./index.js",
+    "stack-books": "./index.js"
   },
   "scripts": {
     "start": "node index.js",

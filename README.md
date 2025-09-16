@@ -8,7 +8,7 @@
 
 <img src="render1757777172178.gif" alt="Gameplay of Stack Books" />
 
-> Simples game made in Node.js where you have to group books of the same color in stacks on your terminal.
+> Simple game made in Node.js where you have to group books of the same color in stacks on your terminal.
 
 ## Features
 
@@ -18,8 +18,8 @@
 
 The project is still under development and the next updates will focus on the following tasks:
 
-- [ ] Add command line arguments to set number of books and stacks
-- [ ] Add colors to the books
+- [X] Add command line arguments to set number of books and stacks
+- [X] Add colors to the books
 - [ ] Make the game more resilient to invalid inputs
 - [ ] Make the game more resilient to invalid moves
 
@@ -34,13 +34,13 @@ Before you begin, ensure you have met the following requirements:
 To play Stack Books, follow these steps:
 
 ```bash
-npx start-stack-books
+npx play-stack-books
 ```
 
 In case you want to play defining the number of books and stacks, you can do it like this:
 
 ```bash
-npx start-stack-books --books 50 --stacks 10
+npx play-stack-books --color 6 --max-height 5
 ```
 
 ## 📝 License
