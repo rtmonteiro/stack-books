@@ -169,11 +169,19 @@ function initializeShelves(game) {
 }
 
 export async function startGame() {
+  const { colors, height } = process.argv.length === 4
+    ? { colors: Number(process.argv[2]), height: Number(process.argv[3]) }
+    : { colors: 6, height: 5 };
+  if (isNaN(colors) || isNaN(height) || colors < 2 || height < 1) {
+    console.error("Invalid arguments. Usage: node index.js [colors (>=2)] [height (>=1)]");
+    process.exit(1);
+  }
+
   console.log("Starting the game...");
   const game = {
-    colors: 6,
-    height: 5,
-    quantity: 9
+    colors,
+    height,
+    quantity: colors + 2 // Two extra shelves for maneuvering
   }
   const game_shelves = initializeShelves(game);
   printShelvesTerminalKit(game.height, game.quantity, game_shelves);
